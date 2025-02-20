@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+</head>
+<body>
+    <h1>QR Code Generator</h1>
+    <form id="qrForm">
+        <input type="text" id="urlInput" placeholder="Enter URL here" required>
+        <button type="submit">Generate QR Code</button>
+    </form>
+    <div id="qrResult"></div>
+
+    <script>
+        document.getElementById('qrForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const url = document.getElementById('urlInput').value;
+
+            try {
+                // Send the URL to the backend API to generate the QR code
+                const response = await fetch(`http://127.0.0.1:8000/generate_qr?url=${encodeURIComponent(url)}`);
+                if (response.ok) {
+                    const qrImage = await response.blob();
+                    const imgElement = document.createElement('img');
+                    imgElement.src = URL.createObjectURL(qrImage);
+                    document.getElementById('qrResult').innerHTML = '';
+                    document.getElementById('qrResult').appendChild(imgElement);
+                } else {
+                    alert("Error generating QR code.");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('There was an issue connecting to the server.');
+            }
+        });
+    </script>
+</body>
+</html>

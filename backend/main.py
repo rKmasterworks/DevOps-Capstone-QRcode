@@ -1,8 +1,18 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from qr_generator import generate_qr_code  # Import the generator function
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Allow CORS for frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
 
 @app.get("/generate_qr")
 async def generate_qr(url: str):
