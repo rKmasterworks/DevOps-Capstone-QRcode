@@ -1,17 +1,17 @@
 import segno
+import io
 import re
 
-print("Enter your link to generate:")
-sender = input().strip()  # Remove extra spaces
-
-if not sender:  # Check if input is empty
-    print("Error: No input provided!")
-else:
-    # Cleaning the filename
-    safe_filename = re.sub(r"[^\w\-]", "_", sender.replace("https://", "").replace("http://", ""))
+def generate_qr_code(url: str):
+    # Clean up the URL (optional)
+    safe_filename = re.sub(r"[^\w\-]", "_", url.replace("https://", "").replace("http://", ""))
     
     # Generate the QR code
-    qrcode = segno.make_qr(sender, mode="byte")
-    qrcode.save(f"{safe_filename}.png", scale=7)
+    qrcode = segno.make_qr(url, mode="byte")
+    
+    # Save QR code to a memory buffer instead of a file
+    img_buffer = io.BytesIO()  # In-memory buffer
+    qrcode.save(img_buffer, kind="png", scale=7)
+    img_buffer.seek(0)  # Go back to the start of the buffer
 
-    print(f"QR code saved as {safe_filename}.png")
+    return img_buffer  # Return the image buffer
