@@ -6,36 +6,42 @@
     <title>QR Code Generator</title>
 </head>
 <body>
-    <h1>QR Code Generator</h1>
-    <form id="qrForm">
-        <input type="text" id="urlInput" placeholder="Enter URL here" required>
-        <button type="submit">Generate QR Code</button>
-    </form>
-    <div id="qrResult"></div>
+
+    <h2>QR Code Generator</h2>
+    <input type="text" id="urlInput" placeholder="Enter URL" />
+    <button onclick="downloadQRCode()">Generate & Download QR Code</button>
 
     <script>
-        document.getElementById('qrForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const url = document.getElementById('urlInput').value;
+        function downloadQRCode() {
+            const url = document.getElementById("urlInput").value;
 
-            try {
-                // Send the URL to the backend API to generate the QR code
-                const response = await fetch(`http://127.0.0.1:8000/generate_qr?url=${encodeURIComponent(url)}`);
-                if (response.ok) {
-                    const qrImage = await response.blob();
-                    const imgElement = document.createElement('img');
-                    imgElement.src = URL.createObjectURL(qrImage);
-                    document.getElementById('qrResult').innerHTML = '';
-                    document.getElementById('qrResult').appendChild(imgElement);
-                } else {
-                    alert("Error generating QR code.");
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('There was an issue connecting to the server.');
+            if (!url) {
+                alert("Please enter a URL!");
+                return;
             }
-        });
+
+            // Making the POST request to the FastAPI backend
+            fetch("http://127.0.0.1:8000/generate_qr", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.blob())  // Handle the image as a blob
+            .then(blob => {
+                // Create an anchor link to trigger the download
+                const link = document.createElement("a");
+                link.href = window.URL.createObjectURL(blob);
+                link.download = "qrcode.png";  // Set the default file name
+                document.body.appendChild(link);
+                link.click();  // Programmatically click the link to start download
+                document.body.removeChild(link);  // Clean up the DOM after download
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("There was an issue generating the QR code.");
+            });
+        }
     </script>
+
 </body>
 </html>
